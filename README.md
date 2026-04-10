@@ -124,7 +124,7 @@ GitHub             — Daily progress tracking
 
 ## 🔗 Follow Along
 
-- 💼 [LinkedIn](https://linkedin.com) — Daily posts with benchmark results
+- 💼 [LinkedIn](https://www.linkedin.com/in/sankar-panneer-selvam-54820565/) — Daily posts with benchmark results
 - 🐙 [GitHub](https://github.com/sankarbaseone/ml-systems-google-prep-) — Daily notebooks + notes
 
 ---
