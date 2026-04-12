@@ -1,4 +1,4 @@
-# 🚀 ML Systems Google Prep
+# 🚀 Google ML System Engineering
 ### 3-Month Sprint → Google ML Systems Engineer (TPU/GPU Focus)
 
 [![Progress](https://img.shields.io/badge/Progress-Day%203%2F90-blue)](https://github.com/sankarbaseone/ml-systems-google-prep-)
