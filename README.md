@@ -1,7 +1,7 @@
-# 🚀 Google ML System Engineering
+# 🚀 Google ML Systems Engineering
 ### 3-Month Sprint → Google ML Systems Engineer (TPU/GPU Focus)
 
-[![Progress](https://img.shields.io/badge/Progress-Day%203%2F90-blue)](https://github.com/sankarbaseone/ml-systems-google-prep-)
+[![Progress](https://img.shields.io/badge/Progress-Day%205%2F90-blue)](https://github.com/sankarbaseone/ml-systems-google-prep-)
 [![Hardware](https://img.shields.io/badge/Hardware-TPU%20v5e--1%20%7C%20T4%20GPU-orange)](https://github.com/sankarbaseone/ml-systems-google-prep-)
 [![Framework](https://img.shields.io/badge/Framework-JAX%20%7C%20XLA%20%7C%20PyTorch-green)](https://github.com/sankarbaseone/ml-systems-google-prep-)
 
@@ -11,6 +11,7 @@
 
 Transition into a **Google ML Systems Engineer** role specializing in AI HPC Infrastructure, TPU/GPU optimization, and distributed ML systems — in 3–6 months.
 
+**Background:** 40-year-old engineer with HPC, GPU clusters, distributed systems, and LLM fine-tuning experience.
 
 ---
 
@@ -18,12 +19,13 @@ Transition into a **Google ML Systems Engineer** role specializing in AI HPC Inf
 
 | Skill | Status |
 |-------|--------|
-| JAX + XLA fundamentals | 🟡 In Progress |
+| JAX + XLA fundamentals | ✅ Done |
 | JIT compilation & tracing | ✅ Done |
 | vmap / pmap parallelism | ✅ Done |
 | GPU vs TPU benchmarking | ✅ Done |
+| Performance engineering (MFU) | ✅ Done |
+| MFU optimization | 🟡 In Progress |
 | Distributed ML systems | 🔲 Upcoming |
-| Performance engineering (MFU) | 🔲 Upcoming |
 | Large-scale training system design | 🔲 Upcoming |
 
 ---
@@ -42,8 +44,8 @@ Transition into a **Google ML Systems Engineer** role specializing in AI HPC Inf
 
 **Key Insight:** JIT cached execution is 512× faster than eager. XLA compiles Python functions into a single TPU kernel — zero interpreter overhead.
 
-📓 Notebook: [`day1_jax_tpu.ipynb`](./day1_jax_tpu.ipynb)
-📝 Notes: [`day1_notes.md`](./day1_notes.md)
+📓 Notebook: [`day1_jax_tpu.ipynb`](./notebooks/day1_jax_tpu.ipynb)
+📝 Notes: [`day1_notes.md`](./notes/day1_notes.md)
 
 ---
 
@@ -64,8 +66,8 @@ Transition into a **Google ML Systems Engineer** role specializing in AI HPC Inf
 - Python control flow breaks tracing → use `jnp.where` not `if`
 - vmap eliminates Python loop overhead → XLA vectorizes at compiler level
 
-📓 Notebook: [`day2_jax_tpu.ipynb`](./day2_jax_tpu.ipynb)
-📝 Notes: [`day2_notes.md`](./day2_notes.md)
+📓 Notebook: [`day2_jax_tpu.ipynb`](./notebooks/day2_jax_tpu.ipynb)
+📝 Notes: [`day2_notes.md`](./notes/day2_notes.md)
 
 ---
 
@@ -84,19 +86,76 @@ Transition into a **Google ML Systems Engineer** role specializing in AI HPC Inf
 - TPU wins structurally for transformer training (all matmuls)
 - Small-scale benchmarks underestimate TPU advantage by 2–3×
 
-📓 Notebook: [`day3_gpu_vs_tpu.ipynb`](./day3_gpu_vs_tpu.ipynb)
-📝 Notes: [`day3_notes.md`](./day3_notes.md)
+📓 Notebook: [`day3_gpu_vs_tpu.ipynb`](./notebooks/day3_gpu_vs_tpu.ipynb)
+📝 Notes: [`day3_notes.md`](./notes/day3_notes.md)
+
+---
+
+### ✅ Day 4 — Training Loop Benchmark
+**Device:** T4 GPU (Kaggle)
+
+| Metric | Result |
+|--------|--------|
+| Min step time | 0.0028s |
+| Avg step time | 0.0031s |
+| Throughput | **83,411 samples/sec** |
+| Final loss | 0.005057 ✓ converging |
+
+**Key Insight:** JIT-compiled training step with proper warmup. Loss converging correctly. GPU baseline established for flagship project comparison.
+
+📓 Notebook: [`day4_training_benchmark.ipynb`](./notebooks/day4_training_benchmark.ipynb)
+📝 Notes: [`day4_notes.md`](./notes/day4_notes.md)
+
+---
+
+### ✅ Day 5 — Memory Profiling + Bottleneck Analysis
+**Device:** T4 GPU (Kaggle)
+
+**Batch Size Scaling (hidden=2048):**
+
+| Batch Size | Throughput |
+|------------|-----------|
+| 64 | 29,697 samples/sec |
+| 256 | 64,423 samples/sec |
+| 1024 | 107,530 samples/sec |
+
+**Hidden Size vs Compute Efficiency (batch=256):**
+
+| Hidden Size | Params | TFLOPS | Status |
+|-------------|--------|--------|--------|
+| 512 | 787K | 0.55 | compute-bound |
+| 1024 | 2.1M | 0.60 | **peak efficiency** |
+| 2048 | 6.3M | 0.49 | memory-bound |
+| 4096 | 21M | 0.43 | memory-bound |
+
+**🚨 MFU = 7%** (T4 theoretical peak = 8.1 TFLOPS)
+
+**Key Insights:**
+- Peak efficiency at hidden=1024, drops beyond due to cache overflow
+- Memory bandwidth bottleneck beyond hidden=1024
+- 93% of GPU sitting idle — this is the optimization target
+- Production transformers target 30–60% MFU
+- Closing 7% → 30% MFU = **4× effective speedup without new hardware**
+
+📓 Notebook: [`day5_memory_profiling.ipynb`](./notebooks/day5_memory_profiling.ipynb)
+📝 Notes: [`day5_notes.md`](./notes/day5_notes.md)
 
 ---
 
 ## 🔲 Upcoming
 
-| Day | Topic |
-|-----|-------|
-| Day 4 | Real training loop benchmark (loss + backward + optimizer) |
-| Day 5 | Memory profiling + bottleneck analysis |
-| Day 6 | MFU (Model FLOP Utilization) measurement |
-| Day 7 | Flagship project: GPU vs TPU Training Optimization |
+| Day | Topic | Status |
+|-----|-------|--------|
+| Day 1 | JAX + TPU setup, JIT fundamentals | ✅ Done |
+| Day 2 | JIT internals, vmap/pmap | ✅ Done |
+| Day 3 | GPU vs TPU benchmark | ✅ Done |
+| Day 4 | Training loop benchmark | ✅ Done |
+| Day 5 | Memory profiling + MFU | ✅ Done |
+| Day 6 | MFU optimization | 🟡 Upcoming |
+| Day 7 | Flagship project launch | 🔲 Upcoming |
+| Week 2 | Distributed training + pmap | 🔲 Upcoming |
+| Week 3 | XLA compiler deep dive | 🔲 Upcoming |
+| Week 4 | System design for large-scale training | 🔲 Upcoming |
 
 ---
 
@@ -104,21 +163,41 @@ Transition into a **Google ML Systems Engineer** role specializing in AI HPC Inf
 
 ```
 JAX + XLA          — Primary ML framework
-PyTorch            — GPU baseline comparison  
-Google Colab       — TPU v5e-1 + T4 GPU
+Flax + Optax       — Neural network + optimizer
+PyTorch            — GPU baseline comparison
+Google Colab       — TPU v5e-1
+Kaggle Notebooks   — T4 GPU (2x)
+GCP Compute Engine — Cloud GPU/TPU (upcoming)
 Python 3.12        — Runtime
 GitHub             — Daily progress tracking
 ```
 
 ---
 
-## 📊 Flagship Project (Week 1 → )
+## 📊 Flagship Project
 
 ### "GPU vs TPU Training Optimization"
 > End-to-end benchmark of a transformer training step on T4 GPU vs v5e-1 TPU.
 > Measuring: throughput, MFU, memory bandwidth utilization, bottlenecks.
 
-**Status:** 🟡 Baseline data collection in progress
+**Current Baseline:**
+- GPU MFU: **7%** (target: 30–60%)
+- GPU Throughput: **83,411 samples/sec**
+- TPU matmul speedup: **25× at 4096×4096**
+
+**Status:** 🟡 MFU baseline established — optimization starting Day 6
+
+---
+
+## 📈 LinkedIn Progress
+
+| Day | Post Topic | Impressions |
+|-----|-----------|-------------|
+| Day 1 | JAX + TPU setup | — |
+| Day 2 | JIT recompilation traps | — |
+| Day 3 | GPU vs TPU: 25× speedup | 1,467+ |
+| Day 4 | Training loop: 83K samples/sec | — |
+| Day 5 | MFU = 7%: Found the real bottleneck | — |
 
 ---
 
