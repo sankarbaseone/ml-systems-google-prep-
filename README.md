@@ -1,7 +1,7 @@
-# 🚀 Google ML Systems Engineering
+# 🚀 ML Systems Google Prep
 ### 3-Month Sprint → Google ML Systems Engineer (TPU/GPU Focus)
 
-[![Progress](https://img.shields.io/badge/Progress-Day%205%2F90-blue)](https://github.com/sankarbaseone/ml-systems-google-prep-)
+[![Progress](https://img.shields.io/badge/Progress-Day%206%2F90-blue)](https://github.com/sankarbaseone/ml-systems-google-prep-)
 [![Hardware](https://img.shields.io/badge/Hardware-TPU%20v5e--1%20%7C%20T4%20GPU-orange)](https://github.com/sankarbaseone/ml-systems-google-prep-)
 [![Framework](https://img.shields.io/badge/Framework-JAX%20%7C%20XLA%20%7C%20PyTorch-green)](https://github.com/sankarbaseone/ml-systems-google-prep-)
 
@@ -24,7 +24,7 @@ Transition into a **Google ML Systems Engineer** role specializing in AI HPC Inf
 | vmap / pmap parallelism | ✅ Done |
 | GPU vs TPU benchmarking | ✅ Done |
 | Performance engineering (MFU) | ✅ Done |
-| MFU optimization | 🟡 In Progress |
+| MFU optimization | ✅ Done |
 | Distributed ML systems | 🔲 Upcoming |
 | Large-scale training system design | 🔲 Upcoming |
 
@@ -142,6 +142,41 @@ Transition into a **Google ML Systems Engineer** role specializing in AI HPC Inf
 
 ---
 
+### ✅ Day 6 — MFU Optimization
+**Device:** T4 GPU (Kaggle)
+
+**MFU Across Batch Sizes and Model Sizes:**
+
+| Hidden | Batch | Time(s) | TFLOPS | MFU% |
+|--------|-------|---------|--------|------|
+| 1024 | 256 | 0.0017 | 1.86 | 22.96% |
+| 1024 | 1024 | 0.0038 | 3.35 | **41.33%** ← peak |
+| 2048 | 256 | 0.0030 | 2.17 | 26.73% |
+| 2048 | 1024 | 0.0089 | 2.91 | 35.91% |
+| 4096 | 256 | 0.0095 | 1.35 | 16.72% |
+| 4096 | 1024 | 0.0288 | 1.79 | 22.06% |
+
+**Mixed Precision Results (hidden=2048, batch=1024):**
+
+| Precision | Throughput | Speedup |
+|-----------|-----------|---------|
+| float32 | 111,306 samples/sec | baseline |
+| float16 | **415,695 samples/sec** | **3.7×** |
+
+**🚀 MFU Journey: 7% → 41.33% (6× improvement)**
+
+**Key Insights:**
+- Larger batch size = GPU compute units stay fed = higher MFU
+- float16 unlocks T4 Tensor Cores: 65 TFLOPS vs 8.1 TFLOPS float32
+- float16 is 3.7× faster — no hardware change needed
+- We're now in production range: PaLM achieved ~46% MFU
+- **The hardware was always capable. We just weren't using it.**
+
+📓 Notebook: [`day6_mfu_optimization.ipynb`](./notebooks/day6_mfu_optimization.ipynb)
+📝 Notes: [`day6_notes.md`](./notes/day6_notes.md)
+
+---
+
 ## 🔲 Upcoming
 
 | Day | Topic | Status |
@@ -151,8 +186,8 @@ Transition into a **Google ML Systems Engineer** role specializing in AI HPC Inf
 | Day 3 | GPU vs TPU benchmark | ✅ Done |
 | Day 4 | Training loop benchmark | ✅ Done |
 | Day 5 | Memory profiling + MFU | ✅ Done |
-| Day 6 | MFU optimization | 🟡 Upcoming |
-| Day 7 | Flagship project launch | 🔲 Upcoming |
+| Day 6 | MFU optimization | ✅ Done |
+| Day 7 | Flagship project launch | 🟡 Upcoming |
 | Week 2 | Distributed training + pmap | 🔲 Upcoming |
 | Week 3 | XLA compiler deep dive | 🔲 Upcoming |
 | Week 4 | System design for large-scale training | 🔲 Upcoming |
@@ -180,12 +215,12 @@ GitHub             — Daily progress tracking
 > End-to-end benchmark of a transformer training step on T4 GPU vs v5e-1 TPU.
 > Measuring: throughput, MFU, memory bandwidth utilization, bottlenecks.
 
-**Current Baseline:**
-- GPU MFU: **7%** (target: 30–60%)
-- GPU Throughput: **83,411 samples/sec**
+**Current Results:**
+- GPU MFU baseline: **7%** → optimized: **41.33%**
+- GPU Throughput: **83,411** → float16: **415,695 samples/sec**
 - TPU matmul speedup: **25× at 4096×4096**
 
-**Status:** 🟡 MFU baseline established — optimization starting Day 6
+**Status:** 🟡 Optimization complete — Flagship project launching Day 7
 
 ---
 
@@ -198,6 +233,7 @@ GitHub             — Daily progress tracking
 | Day 3 | GPU vs TPU: 25× speedup | 1,467+ |
 | Day 4 | Training loop: 83K samples/sec | — |
 | Day 5 | MFU = 7%: Found the real bottleneck | — |
+| Day 6 | MFU 7% → 41%: 6× without new hardware | — |
 
 ---
 
